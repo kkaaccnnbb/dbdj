@@ -1,0 +1,950 @@
+if getgenv()["Laad"] == nil then
+  getgenv()["Laad"]="Fix Version"
+end
+local lp=game.Players.LocalPlayer
+local mouse = lp:GetMouse()
+local CurrentSlot = game.Players.LocalPlayer:WaitForChild("CurrentSaveSlot").Value
+local ScriptLoadOrSave = false
+local CurrentlySavingOrLoading = game.Players.LocalPlayer:WaitForChild("CurrentlySavingOrLoading")
+local bai = {
+  autoaxedupe=false,
+  cuttreeselect="Generic",
+  axedupepick=nil,
+  autodupe=false,
+  dxmz="",
+  slot=-1,
+  zlwjia="",
+  zix=1,
+  zlz=3,
+  bringamount=1,
+  bringtree=false,
+  waterwalk=false,
+  awaysday=false,
+  awaysdnight=false,
+  nofog=false,
+  cswjiail=nil,
+  itemset=nil,
+  autocsdx=nil,
+  autobuystop=false,
+  autobuyamount=1,
+  away = nil
+}
+
+local function notify(Title,Text,Duration) -- Sends Notification in the bottom right of the screen
+  game.StarterGui:SetCore("SendNotification", {
+    Title = Title;
+    Text = Text;
+    Icon = nil;
+    Duration = Duration
+  })
+end
+
+function Dupeaxe()
+
+
+  lp.Character.Humanoid:UnequipTools()
+  local oldpos = lp.Character.HumanoidRootPart.CFrame
+  for i,v in pairs(game:service"Players".LocalPlayer.Backpack:GetChildren()) do
+    game:GetService("ReplicatedStorage").Interaction.ClientInteracted:FireServer(v,"Drop tool")
+  end
+
+  game:service"Players".LocalPlayer.Character.Head:Destroy()
+  wait(6)
+  lp.Character.HumanoidRootPart.CFrame=oldpos
+end
+local Vehicle
+function cartp(cframe)
+  Vehicle = lp.Character.Humanoid.SeatPart.Parent
+  spawn(function()
+    for i = 1, 3 do
+      task.wait()
+      Vehicle:SetPrimaryPartCFrame(cframe)
+    end
+  end)
+end
+function ItemStackeraxe(ItemType, XAxis, ZAxis)
+  local Player = game.Players.LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(0, 3.5, 0)
+  local Items = {}
+
+  for i, v in pairs(game:GetService("Workspace").PlayerModels:GetChildren()) do
+    if v:FindFirstChild("Owner") and tostring(v.Owner.Value) ==bai.zlwjia
+      then if (
+        v:FindFirstChild "DraggableItem" and tostring(v.DraggableItem.Parent) == ItemType)
+        then table
+        .
+        insert(Items, v)
+      end
+    end
+  end
+  local Count = 0
+  for Y = 1, math.ceil(#Items / (XAxis * ZAxis)) do for X = 1, XAxis do for Z = 1, ZAxis do Count = Count
+        + 1
+        game:GetService("ReplicatedStorage").PlaceStructure.ClientPlacedStructure:FireServer(nil,
+        CFrame.new(X * Items[1].Main.Size.X, Y * Items[1].Main.Size.Y, Z * Items[1].Main.Size.Z) + Player
+        ,
+        game.Players.LocalPlayer, nil, Items[Count], true)
+      end
+    end
+  end
+end
+function ItemStackerbox(ItemType, XAxis, ZAxis)
+  local Player = game.Players.LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(0, 4, 0)
+  local Items = {}
+
+  for i, v in pairs(game:GetService("Workspace").PlayerModels:GetChildren()) do
+    if v:FindFirstChild("Owner") and tostring(v.Owner.Value) == bai.zlwjia then
+      if v:FindFirstChild("PurchasedBoxItemName") and tostring(v.PurchasedBoxItemName.Value) == ItemType then
+        table.insert(Items, v)
+        print("Added item to Items table:", v)
+      end
+    end
+  end
+
+  print("Total items found:", #Items)
+
+  local Count = 0
+  for Y = 1, math.ceil(#Items / (XAxis * ZAxis)) do
+    for X = 1, XAxis do
+      for Z = 1, ZAxis do
+        Count = Count + 1
+        if Count > #Items then
+          break
+        end
+        game:GetService("ReplicatedStorage").PlaceStructure.ClientPlacedStructure:FireServer(nil,
+        CFrame.new(X * Items[1].Main.Size.X, Y * Items[1].Main.Size.Y, Z * Items[1].Main.Size.Z) + Player,
+        game.Players.LocalPlayer, nil, Items[Count], true)
+        print("Placed item at position:", X, Y, Z, Items[Count])
+      end
+    end
+  end
+end
+function stealitem(player,model)
+  pcall(function()
+    if model:FindFirstChild("Owner") and model.Owner.Value == player then
+      if model.PrimaryPart and model:FindFirstChild("Type") then
+        game:GetService("ReplicatedStorage").PlaceStructure.ClientPlacedStructure:FireServer(nil,itemset,lp, nil, model, true)
+      end
+    end
+  end)
+end
+local function CheckIfSlotAvailable(Slot)
+  for a,b in pairs(game.ReplicatedStorage.LoadSaveRequests.GetMetaData:InvokeServer(game.Players.LocalPlayer)) do
+    if a == Slot then
+      for c,d in pairs(b) do
+        if c == "NumSaves" and d ~= 0 then
+          return true
+         else
+          return false
+        end
+      end
+    end
+  end
+end
+local playeritems = {}
+local models = {}
+local function getITEMs(player, type)
+  for i, v in pairs(game.Workspace.PlayerModels:GetChildren()) do
+    if v:FindFirstChild("Owner") and v.Owner.Value == player then
+      if not v:FindFirstChild("BlueprintWoodClass") and not v:FindFirstChild("TreeClass") then
+        if v:FindFirstChild("Type") and v:FindFirstChild("Type").Value == type then
+          if not table.find(playeritems, tostring(v.Name)) then
+            table.insert(playeritems, tostring(v.Name))
+          end
+          local baseName = tostring(v.Name)
+          models[baseName] = v          
+        end
+      end
+    end
+  end
+end
+local function CheckSlotNumber() --Checks if the slot number is right
+  if bai.slot == "1" or bai.slot == "2" or bai.slot == "3" or bai.slot == "4" or bai.slot == "5" or bai.slot == "6" then
+    local SlotNumber = tonumber(bai.slot)
+    return SlotNumber
+   else return false
+  end
+end
+
+
+
+
+function toolsta(toolname)
+  return require(game.ReplicatedStorage.Purchasables.Tools.AllTools[toolname].AxeClass).new()
+end
+
+local function table_foreach(table, callback)
+  for i=1,#table do
+    callback(i, table[i])
+  end
+end
+
+
+local function tp(pos)
+  if typeof(pos) == "CFrame" then
+    lp.Character:SetPrimaryPartCFrame(pos)
+   elseif typeof(pos) == "Vector3" then
+    lp.Character:MoveTo(pos)
+  end
+end
+
+function sellwood()
+  for _, Log in pairs(workspace.LogModels:GetChildren()) do
+    if Log.Name:sub(1, 6) == "Loose_" and Log:findFirstChild("Owner") then
+      if Log.Owner.Value == game.Players.LocalPlayer then
+        for i,v in pairs(Log:GetChildren()) do
+          if v.Name=="WoodSection" then
+            spawn(function()
+              for i=1,100 do
+                wait();
+                game.ReplicatedStorage.Interaction.ClientRequestOwnership:FireServer(v.WoodSection)
+                game.ReplicatedStorage.Interaction.ClientIsDragging:FireServer(v.WoodSection)
+                v.CFrame=CFrame.new(Vector3.new(315, -0.296, 85.791))*CFrame.Angles(math.rad(90),0,0)
+              end
+            end)
+          end
+        end
+
+      end
+    end
+  end
+end
+
+
+
+local function cutPart (tool,event, treeClass,axestr)
+  game:GetService"ReplicatedStorage".Interaction.RemoteProxy:FireServer(event, {
+    tool = tool,
+    faceVector = Vector3.new(0, 0,-1),
+    height = 0.3,
+    sectionId = 1,
+    hitPoints = axestr,
+    cooldown = -14,
+    cuttingClass = "Axe"
+  })
+end
+local treeListener = function(treeClass, callback)
+  local childAdded
+  a= workspace.LogModels.ChildAdded:Connect(function(child)
+    local owner = child:WaitForChild("Owner")
+    if owner.Value == lp and child.TreeClass.Value == treeClass then
+      a:Disconnect()
+      callback(child)
+    end
+  end)
+end
+
+
+local getBiggestTree = function(treeClass)
+  for _,v in next,workspace:children()do
+    if tostring(v)=="TreeRegion"then
+      for _,g in next,v:children()do
+        if g:FindFirstChild("TreeClass")and tostring(g.TreeClass.Value)==treeClass and g:FindFirstChild("Owner")then
+          if g.Owner.Value==nil or tostring(g.Owner.Value)==tostring(lp)then
+            if #g:children() > 5 and g:FindFirstChild("WoodSection")then
+              for h,j in next,g:children() do
+                if j:FindFirstChild("ID")and j.ID.Value==1 and j.Size.Y>.5 then
+                  return j;
+                end;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+  return false;
+end
+local function lowerBridge(value)
+
+  if value=="Higher"then
+    for _,v in pairs(game.workspace.Bridge.VerticalLiftBridge.Lift:GetChildren()) do
+      v.CFrame = v.CFrame + Vector3.new(0, 26, 0)
+    end
+
+   elseif value=="Lower"then
+    for _,v in pairs(game.workspace.Bridge.VerticalLiftBridge.Lift:GetChildren()) do
+      v.CFrame = v.CFrame + Vector3.new(0, -26, 0)
+    end
+  end;
+end
+
+if not isfile("NoNNNNVQEBZQGE") then
+  notify("Virtual","缺失主要文件正在安装中",3)
+  local script = [[local a=game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame;for b,c in pairs(game.Workspace.LogModels:GetChildren())do if c.Name:sub(1,6)=="Loose_"and c:findFirstChild("Owner")then if c.Owner.Value==game.Players.LocalPlayer then local d=c;local e="Ifyouarereadingthisstophackingbrolegitalsokrnlisbadbtw432rewdWdwFe432432rwDWDAVWdawgdGWAYDFGYTUW"for f=1,15 do game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(d,e)d:PivotTo(a)game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(d,e)game:GetService('RunService').Stepped:wait()end end end end]]
+  writefile("NoNNNNVQEBZQGE",script)
+end
+function modwood()
+  local wood
+  local Saw
+  notify("Virtual", "请点击一颗树", 4)
+  local ModTree = mouse.Button1Up:Connect(function()
+    local obj = mouse.Target.Parent
+    if not obj:FindFirstChild "RootCut" and obj.Parent.Name == "TreeRegion" then
+      return notify("错误!", "这棵树还没有砍!", 3)
+    end
+    if obj:FindFirstChild "Owner" and obj.Owner.Value == lp and obj:FindFirstChild "WoodSection" then
+      wood = obj
+      notify("Virtual", "已选择树!", 3)
+    end
+    if obj.Name:find("Sawmill")then
+      Saw=sawmill;
+      notify("Virtual","剧木机已选择",4)
+     elseif obj.Parent.Name:find("Sawmill")or obj.Parent:FindFirstChild"BlockageAlert"then
+      Saw=obj.Parent
+      notify("Virtual","剧木机已选择",4)
+    end
+  end)
+  repeat task.wait(.01) until wood and Saw ~= nil
+  ModTree:Disconnect()
+  ModTree = nil
+  s = true
+  local SawC = Saw.Particles.CFrame + Vector3.new(0.7, 0,0)
+  local cu,cw= 0,nil
+  for p, I in next, wood:GetChildren() do
+    if I.Name == "WoodSection" then
+      if I.ID.Value > cu then
+        cu = I.ID.Value
+        cw=I
+      end
+    end
+  end
+  for p, I in next, wood:GetChildren() do
+    if I.Name == "WoodSection" then
+      for p, b in next, I.ChildIDs:GetChildren() do
+        if b.Value ==cu then
+          cv = I
+        end
+      end
+    end
+  end
+  wait()
+  local tool= 0
+  for i,v in pairs (lp.Backpack:GetChildren()) do
+    if v.Name ~= "BlueprintTool"then
+      tool=tool+1
+    end
+  end
+  if tool==0 then
+    return
+    notify("Virtual","你需要斧头",4)
+  end
+
+
+  for i,v in pairs (lp.Backpack:GetChildren()) do
+    if v.Name ~= "BlueprintTool"then
+
+      too = v
+    end
+  end
+  local toolname
+  for i ,v in pairs (too:GetChildren()) do
+    if v.Name=="ToolName" then
+      toolname=v.Value
+      Damagefor=function(toolname)
+        return require(game.ReplicatedStorage.Purchasables.Tools.AllTools[toolname].AxeClass).new()
+      end
+      Damage=Damagefor(toolname).Damage
+    end
+  end
+  local function anti()
+    if s then
+      loadstring(readfile("NoNNNNVQEBZQGE"))()
+      s = false
+    end
+  end
+  game.Workspace["Region_Volcano"].Lava.Lava.CFrame=CFrame.new(5330,75.5,-15)
+  repeat wait()
+    --Fix by 0x15 & Laad
+    local ltem = cv
+    local bypassanticheat = "Ifyouarereadingthisstophackingbrolegitalsokrnlisbadbtw432rewdWdwFe432432rwDWDAVWdawgdGWAYDFGYTUW"
+    for e = 1, 15 do
+      game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(ltem,bypassanticheat)
+      ltem:PivotTo(game.Workspace["Region_Volcano"].Lava.Lava.CFrame)
+      game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(ltem,bypassanticheat)
+      game:GetService('RunService').Stepped:wait();
+    end
+    anti()
+
+  until cv:FindFirstChild("LavaFire");
+  cv:FindFirstChild("LavaFire"):Destroy();
+  for i=1,20 do
+    cw:PivotTo(cw.CFrame)
+    local bypassanticheat = "Ifyouarereadingthisstophackingbrolegitalsokrnlisbadbtw432rewdWdwFe432432rwDWDAVWdawgdGWAYDFGYTUW"
+    game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(cw,bypassanticheat)
+    cw:PivotTo(cw.CFrame)
+    cw.CFrame=SawC
+    game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(cw,bypassanticheat)
+    game:GetService('RunService').Stepped:wait();
+    cw:WaitForChild("BodyVelocity"):Destroy()
+    cw:WaitForChild("BodyAngularVelocity"):Destroy()
+    cw:WaitForChild("LavaFire"):Destroy()
+    cw.CFrame=SawC
+    game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(v,bypassanticheat)
+    game:GetService('RunService').Stepped:wait();
+  end
+end
+local SawP
+local function bringTree(treeClass)
+  lp.Character.Humanoid:UnequipTools()
+  local oldPos=lp.Character.HumanoidRootPart.CFrame;
+  local tool
+  local tool=0
+  for i,v in pairs (lp.Backpack:GetChildren()) do
+    if v.Name ~= "BlueprintTool"then
+      tool=tool+1
+    end
+  end
+  if tool==0 then
+    return
+    notify("Virtual","你需要斧头",4)
+  end
+
+
+  for i,v in pairs (lp.Backpack:GetChildren()) do
+    if v.Name ~= "BlueprintTool"then
+
+      tool = v
+    end
+  end
+  local toolname
+  for i ,v in pairs (tool:GetChildren()) do
+    if v.Name=="ToolName" then
+      toolname=v.Value
+
+    end
+  end
+
+  local axestr=toolsta(toolname)
+  if axestr.SpecialTrees and axestr.SpecialTrees[treeClass] then
+    for i, v in next, axestr.SpecialTrees[treeClass] do
+      axestr[i] = v
+    end
+  end
+  local tree = getBiggestTree(treeClass)
+
+  if not tree then
+    return notify("Virtual","没有找到树",4)
+  end
+
+
+
+
+  local treeCut = false
+  if treeClass=="LoveCave" and axestr.Damage<10000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+  if treeClass=="Shine" and axestr.Damage<80000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+  if treeClass=="Shine" and axestr.Damage<80000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+  if treeClass=="Magma" and axestr.Damage<10000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+  if treeClass=="Ice" and axestr.Damage<8000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+  if treeClass== "Radioactive" and axestr.Damage<10000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+  if treeClass== "Scale" and axestr.Damage<40000000 then
+    return notify("Virtual","你没有合适的斧头去砍这棵树") end
+
+  workspace.Camera.CameraSubject = tree
+  treeListener(treeClass, function(tree)
+    tree.PrimaryPart = tree:FindFirstChild("WoodSection")
+    treeCut = true
+    wait()
+    workspace.Camera.CameraSubject = lp.Character
+
+  end)
+
+  task.wait()
+
+
+  repeat
+
+    cutPart(tool,tree.Parent.CutEvent, treeClass,axestr.Damage)
+    wait()
+  until treeCut
+
+  if bringmod then
+    local wood
+    for _, Log in pairs(game.Workspace.LogModels:GetChildren()) do
+      if Log.Name:sub(1, 6) == "Loose_" and Log:findFirstChild("Owner") then
+        if Log.Owner.Value == game.Players.LocalPlayer then
+          wood =Log
+        end
+      end
+    end
+    local Saw = SawP
+    s = true
+    local SawC = Saw.Particles.CFrame + Vector3.new(0.7, 0,0)
+    local cu,cw= 0,nil
+    for p, I in next, wood:GetChildren() do
+      if I.Name == "WoodSection" then
+        if I.ID.Value > cu then
+          cu = I.ID.Value
+          cw=I
+        end
+      end
+    end
+    for p, I in next, wood:GetChildren() do
+      if I.Name == "WoodSection" then
+        for p, b in next, I.ChildIDs:GetChildren() do
+          if b.Value ==cu then
+            cv = I
+          end
+        end
+      end
+    end
+    wait()
+    local tool= 0
+    for i,v in pairs (lp.Backpack:GetChildren()) do
+      if v.Name ~= "BlueprintTool"then
+        tool=tool+1
+      end
+    end
+    if tool==0 then
+      return
+      notify("Virtual","你需要斧头",4)
+    end
+
+
+    for i,v in pairs (lp.Backpack:GetChildren()) do
+      if v.Name ~= "BlueprintTool"then
+
+        too = v
+      end
+    end
+    local toolname
+    for i ,v in pairs (too:GetChildren()) do
+      if v.Name=="ToolName" then
+        toolname=v.Value
+        Damagefor=function(toolname)
+          return require(game.ReplicatedStorage.Purchasables.Tools.AllTools[toolname].AxeClass).new()
+        end
+        Damage=Damagefor(toolname).Damage
+      end
+    end
+    local function anti()
+      if s then
+        loadstring(readfile("NoNNNNVQEBZQGE"))()
+        s = false
+      end
+    end
+    game.Workspace["Region_Volcano"].Lava.Lava.CFrame=CFrame.new(5330,75.5,-15)
+    repeat wait()
+      --Fix by 0x15 & Laad
+      local ltem = cv
+      local bypassanticheat = "Ifyouarereadingthisstophackingbrolegitalsokrnlisbadbtw432rewdWdwFe432432rwDWDAVWdawgdGWAYDFGYTUW"
+      for e = 1, 15 do
+        game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(ltem,bypassanticheat)
+        ltem:PivotTo(game.Workspace["Region_Volcano"].Lava.Lava.CFrame)
+        game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(ltem,bypassanticheat)
+        game:GetService('RunService').Stepped:wait();
+      end
+      anti()
+
+    until cv:FindFirstChild("LavaFire");
+    cv:FindFirstChild("LavaFire"):Destroy();
+    for i=1,20 do
+      cw:PivotTo(cw.CFrame)
+      local bypassanticheat = "Ifyouarereadingthisstophackingbrolegitalsokrnlisbadbtw432rewdWdwFe432432rwDWDAVWdawgdGWAYDFGYTUW"
+      game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(cw,bypassanticheat)
+      cw:PivotTo(cw.CFrame)
+      cw.CFrame=SawC
+      game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(cw,bypassanticheat)
+      game:GetService('RunService').Stepped:wait();
+      cw:WaitForChild("BodyVelocity"):Destroy()
+      cw:WaitForChild("BodyAngularVelocity"):Destroy()
+      cw:WaitForChild("LavaFire"):Destroy()
+      cw.CFrame=SawC
+      game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(v,bypassanticheat)
+      game:GetService('RunService').Stepped:wait();
+    end
+   else
+    local oldPosition = lp.Character.HumanoidRootPart.CFrame
+
+    for _, Log in pairs(game.Workspace.LogModels:GetChildren()) do
+      if Log.Name:sub(1, 6) == "Loose_" and Log:findFirstChild("Owner") then
+        if Log.Owner.Value == game.Players.LocalPlayer then
+          --Fix by 0x15
+          local ltem = Log
+          local bypassanticheat = "Ifyouarereadingthisstophackingbrolegitalsokrnlisbadbtw432rewdWdwFe432432rwDWDAVWdawgdGWAYDFGYTUW"
+          for e = 1, 15 do
+            game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(ltem,bypassanticheat)
+            ltem:PivotTo(oldPosition)
+            game:GetService("ReplicatedStorage").Interaction.ClientIsDragging:FireServer(ltem,bypassanticheat)
+            game:GetService('RunService').Stepped:wait();
+          end
+        end
+      end
+    end
+  end
+end
+local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/kkaaccnnbb/Logan/refs/heads/main/uiilb"))()
+
+local win = UI:new("Virtual--木材大亨2")
+local Tab = win:Tab("主要功能", "10728953248")
+local Section5 = Tab:section("蓝图")
+local Section6 = Tab:section("带来树")
+local w={"白杨树","桦树","无趣","灌木丛","糖果","糖果替代品","糖果霓虹","糖果棒绿","糖果棒红","卡通风格","卡通彩虹","洞穴爬行者","洞穴","洞穴爬行者","樱桃","鹅卵石","饼干","沙","钻石","干燥","干燥霓虹","电力","余烬","冷杉","霜","通用","特殊通用","玻璃","发光蘑菇","金","金沼泽","草1","绿色沼泽","洞窟爬行者","地狱","koa树","孤洞","枫树","大理石","泥泞下水道","橡树","棕榈树","松树","罐灌木","土豆","REEE","灵魂","彩虹","随机","红宝石","鳞片","污水树","闪耀","标志","银","彩虹糖","天空","雪","雪光","诡异","恐怖僵尸","恐怖霓虹","石头","玉米饼","测试","线","隧道爬行者","霓虹彩虹","虚拟","虚空","火山","华夫饼","胡桃","灰烬","铜","狗","通用主","通用秋","通用死","大橡树","岩浆","冰","放射性","通用金","天体","星星","砖替代品","深色砖","砖","裂缝岩浆","蓝色火焰","火焰","骨头","彩虹火焰"}
+
+Section5:Dropdown("选择树","Dropdown",w,function(b)
+  if b == "白杨树" then
+    bai.cuttreeselect = "Aspen"
+   elseif b == "桦树" then
+    bai.cuttreeselect = "Birch"
+   elseif b == "无趣" then
+    bai.cuttreeselect = "Blah"
+   elseif b == "灌木丛" then
+    bai.cuttreeselect = "Bush"
+   elseif b == "糖果" then
+    bai.cuttreeselect = "Candy"
+   elseif b == "糖果替代品" then
+    bai.cuttreeselect = "CandyAlternitive"
+   elseif b == "糖果霓虹" then
+    bai.cuttreeselect = "CandyNeon"
+   elseif b == "糖果棒绿" then
+    bai.cuttreeselect = "CandycaneGreen"
+   elseif b == "糖果棒红" then
+    bai.cuttreeselect = "CandycaneRed"
+   elseif b == "卡通风格" then
+    bai.cuttreeselect = "Cartoony"
+   elseif b == "卡通彩虹" then
+    bai.cuttreeselect = "CartoonyRainbow"
+   elseif b == "洞穴爬行者" then
+    bai.cuttreeselect = "CaveCrawler"
+   elseif b == "洞穴" then
+    bai.cuttreeselect = "Cavern"
+   elseif b == "洞窟爬行者" then
+    bai.cuttreeselect = "CavernCrawler"
+   elseif b == "樱桃" then
+    bai.cuttreeselect = "Cherry"
+   elseif b == "鹅卵石" then
+    bai.cuttreeselect = "CobbleStone"
+   elseif b == "饼干" then
+    bai.cuttreeselect = "Cookie"
+   elseif b == "沙" then
+    bai.cuttreeselect = "Sand"
+   elseif b == "钻石" then
+    bai.cuttreeselect = "Diamond"
+   elseif b == "干燥" then
+    bai.cuttreeselect = "Dry"
+   elseif b == "干燥霓虹" then
+    bai.cuttreeselect = "DryNeon"
+   elseif b == "电力" then
+    bai.cuttreeselect = "Electric"
+   elseif b == "余烬" then
+    bai.cuttreeselect = "Ember"
+   elseif b == "冷杉" then
+    bai.cuttreeselect = "Fir"
+   elseif b == "霜" then
+    bai.cuttreeselect = "Frost"
+   elseif b == "通用" then
+    bai.cuttreeselect = "Generic"
+   elseif b == "特殊通用" then
+    bai.cuttreeselect = "GenericSpecial"
+   elseif b == "玻璃" then
+    bai.cuttreeselect = "Glass"
+   elseif b == "发光蘑菇" then
+    bai.cuttreeselect = "GlowShroom"
+   elseif b == "金" then
+    bai.cuttreeselect = "Gold"
+   elseif b == "金沼泽" then
+    bai.cuttreeselect = "GoldSwampy"
+   elseif b == "草1" then
+    bai.cuttreeselect = "Grass1"
+   elseif b == "绿色沼泽" then
+    bai.cuttreeselect = "GreenSwampy"
+   elseif b == "洞窟爬行者" then
+    bai.cuttreeselect = "GrottoCrawler"
+   elseif b == "地狱" then
+    bai.cuttreeselect = "Hell"
+   elseif b == "koa树" then
+    bai.cuttreeselect = "Koa"
+   elseif b == "孤洞" then
+    bai.cuttreeselect = "LoneCave"
+   elseif b == "枫树" then
+    bai.cuttreeselect = "Maple"
+   elseif b == "大理石" then
+    bai.cuttreeselect = "Marble"
+   elseif b == "泥泞下水道" then
+    bai.cuttreeselect = "MuckySewer"
+   elseif b == "橡树" then
+    bai.cuttreeselect = "Oak"
+   elseif b == "棕榈树" then
+    bai.cuttreeselect = "Palm"
+   elseif b == "松树" then
+    bai.cuttreeselect = "Pine"
+   elseif b == "罐灌木" then
+    bai.cuttreeselect = "PotBush"
+   elseif b == "土豆" then
+    bai.cuttreeselect = "Potato"
+   elseif b == "REEE" then
+    bai.cuttreeselect = "REEE"
+   elseif b == "灵魂" then
+    bai.cuttreeselect = "Spirit"
+   elseif b == "彩虹" then
+    bai.cuttreeselect = "Rainbow"
+   elseif b == "随机" then
+    bai.cuttreeselect = "Random"
+   elseif b == "红宝石" then
+    bai.cuttreeselect = "Ruby"
+   elseif b == "鳞片" then
+    bai.cuttreeselect = "Scale"
+   elseif b == "污水树" then
+    bai.cuttreeselect = "SewageTree"
+   elseif b == "闪耀" then
+    bai.cuttreeselect = "Shine"
+   elseif b == "标志" then
+    bai.cuttreeselect = "Sign"
+   elseif b == "银" then
+    bai.cuttreeselect = "Silver"
+   elseif b == "彩虹糖" then
+    bai.cuttreeselect = "Skittles"
+   elseif b == "天空" then
+    bai.cuttreeselect = "Sky"
+   elseif b == "雪" then
+    bai.cuttreeselect = "Snow"
+   elseif b == "雪光" then
+    bai.cuttreeselect = "SnowGlow"
+   elseif b == "诡异" then
+    bai.cuttreeselect = "Spooky"
+   elseif b == "恐怖僵尸" then
+    bai.cuttreeselect = "SpookyGhoul"
+   elseif b == "恐怖霓虹" then
+    bai.cuttreeselect = "SpookyNeon"
+   elseif b == "石头" then
+    bai.cuttreeselect = "Stone"
+   elseif b == "玉米饼" then
+    bai.cuttreeselect = "Taco"
+   elseif b == "测试" then
+    bai.cuttreeselect = "Test"
+   elseif b == "线" then
+    bai.cuttreeselect = "Thread"
+   elseif b == "隧道爬行者" then
+    bai.cuttreeselect = "TunnelCrawler"
+   elseif b == "霓虹彩虹" then
+    bai.cuttreeselect = "NeonRainbow"
+   elseif b == "虚拟" then
+    bai.cuttreeselect = "Virtual"
+   elseif b == "虚空" then
+    bai.cuttreeselect = "Void"
+   elseif b == "火山" then
+    bai.cuttreeselect = "Volcano"
+   elseif b == "华夫饼" then
+    bai.cuttreeselect = "Waffer"
+   elseif b == "胡桃" then
+    bai.cuttreeselect = "Walnut"
+   elseif b == "灰烬" then
+    bai.cuttreeselect = "Ash"
+   elseif b == "铜" then
+    bai.cuttreeselect = "Copper"
+   elseif b == "狗" then
+    bai.cuttreeselect = "Dog"
+   elseif b == "通用主" then
+    bai.cuttreeselect = "GenericPrime"
+   elseif b == "通用秋" then
+    bai.cuttreeselect = "GenericFall"
+   elseif b == "通用死" then
+    bai.cuttreeselect = "GenericDead"
+   elseif b == "大橡树" then
+    bai.cuttreeselect = "GreatOak"
+   elseif b == "岩浆" then
+    bai.cuttreeselect = "Magma"
+   elseif b == "冰" then
+    bai.cuttreeselect = "Ice"
+   elseif b == "放射性" then
+    bai.cuttreeselect = "Radioactive"
+   elseif b == "通用金" then
+    bai.cuttreeselect = "GenericGold"
+   elseif b == "天体" then
+    bai.cuttreeselect = "Celestial"
+   elseif b == "星星" then
+    bai.cuttreeselect = "Star"
+   elseif b == "砖替代品" then
+    bai.cuttreeselect = "BrickAlternative"
+   elseif b == "深色砖" then
+    bai.cuttreeselect = "BrickDark"
+   elseif b == "砖" then
+    bai.cuttreeselect = "Brick"
+   elseif b == "裂缝岩浆" then
+    bai.cuttreeselect = "CrackedLava"
+   elseif b == "蓝色火焰" then
+    bai.cuttreeselect = "BlueFlame"
+   elseif b == "火焰" then
+    bai.cuttreeselect = "Flame"
+   elseif b == "骨头" then
+    bai.cuttreeselect = "Bone"
+   elseif b == "彩虹火焰" then
+    bai.cuttreeselect = "RainbowFlame"
+  end
+end)
+Section5:Button("获取道具", function()
+  local tool = Instance.new("Tool", lp.Backpack)
+  tool.RequiresHandle = false
+  tool.Name = "点击一块蓝图"
+  tool.Activated:Connect(function()
+    local str = mouse.Target.Parent
+    game.ReplicatedStorage.PlaceStructure.ClientPlacedStructure:FireServer(str.ItemName.Value, str.PrimaryPart.CFrame, game.Players.LocalPlayer, bai.cuttreeselect, str ,false)
+  end)
+end)
+Section6:Dropdown("选择树","Dropdown",{"普通树","曲奇树","卡通树","幻影树","砖头木","生命树","玻璃冰木","红颜树", "石头木","沼泽黄金", "樱花", "蓝木", "冰木", "火山木", "橡木", "巧克力木", "白桦木", "黄金木", "雪地松", "僵尸木", "大巧克力树", "椰子树","南瓜木","幽灵木","大理石木","天堂木","虚拟木","玻璃木","糖果树","积木树","发光红色糖果木","彩虹树","雷电木","煤炭木","岩浆树","紫木","下水道木","辐射木","地狱木","沙滩木","白洋木","发光彩虹木","布料木","虚空木","裂纹木","幽灵食尸者","金子木","生锈木","土豆木","星空木","秋天木","星星木","雪木","死木","火焰木","鬼火","彩虹火焰"},function(b)
+  if b=="普通树"then
+    SelectTrre="Generic"
+   elseif b=="沼泽黄金"then
+    SelectTrre="GoldSwampy"
+   elseif b=="樱花"then
+    SelectTrre="Cherry"
+   elseif b=="蓝木"then
+    SelectTrre="CaveCrawler"
+   elseif b=="冰木"then
+    SelectTrre="Frost"
+   elseif b=="火山木"then
+    SelectTrre="Volcano"
+   elseif b=="橡木"then
+    SelectTrre="Oak"
+   elseif b=="巧克力木"then
+    SelectTrre="Walnut"
+   elseif b=="白桦木"then
+    SelectTrre="Birch"
+   elseif b=="黄金木"then
+    SelectTrre="SnowGlow"
+   elseif b=="雪地松"then
+    SelectTrre="Pine"
+   elseif b=="僵尸木"then
+    SelectTrre="GreenSwampy"
+   elseif b=="大巧克力树"then
+    SelectTrre="Koa"
+   elseif b=="椰子树"then
+    SelectTrre="Palm"
+   elseif b=="幽灵木"then
+    SelectTrre="Spooky"
+   elseif b=="南瓜木"then
+    SelectTrre="SpookyNeon"
+   elseif b=="大理石木"then
+    SelectTrre="Marble"
+   elseif b=="天堂木"then
+    SelectTrre="Sky"
+   elseif b=="虚拟木"then
+    SelectTrre="Virtual"
+   elseif b=="玻璃木"then
+    SelectTrre="Taco"
+   elseif b=="糖果树"then
+    SelectTrre="CandycaneGreen"
+   elseif b=="积木树"then
+    SelectTrre="CandycaneRed"
+   elseif b=="发光红色糖果木"then
+    SelectTrre="CandyNeon"
+   elseif b=="彩虹树"then
+    SelectTrre="Rainbow"
+   elseif b=="雷电木"then
+    SelectTrre="Electric"
+   elseif b=="煤炭木"then
+    SelectTrre="GenericDead"
+   elseif b=="岩浆树"then
+    SelectTrre="Skittles"
+   elseif b=="紫木"then
+    SelectTrre="Cavern"
+   elseif b=="下水道木"then
+    SelectTrre="MuckySewer"
+   elseif b=="辐射木"then
+    SelectTrre="Radioactive"
+   elseif b=="地狱木"then
+    SelectTrre="Hell"
+   elseif b=="沙滩木"then
+    SelectTrre="Sand"
+   elseif b=="白洋木"then
+    SelectTrre="Aspen"
+   elseif b=="发光彩虹木"then
+    SelectTrre="NeonRainbow"
+   elseif b=="布料木"then
+    SelectTrre="Dog"
+   elseif b=="幻影树"then
+    SelectTrre="LoneCave"
+   elseif b=="红颜树"then
+    SelectTrre="Shine"
+   elseif b=="石头木"then
+    SelectTrre="Magma"
+   elseif b=="玻璃冰木"then
+    SelectTrre="Ice"
+   elseif b=="砖头木"then
+    SelectTrre="Blah"
+   elseif b=="卡通树"then
+    SelectTrre="CobbleStone"
+   elseif b=="曲奇树"then
+    SelectTrre="Cookie"
+   elseif b=="生命树"then
+    SelectTrre="GreatOak"
+   elseif b=="虚空木"then
+    SelectTrre="Void"
+   elseif b=="裂纹木"then
+    SelectTrre="Celestial"
+   elseif b=="幽灵食尸者"then
+    SelectTrre="SpookyGhoul"
+   elseif b=="生锈木"then
+    SelectTrre="SewageTree"
+   elseif b=="金子木"then
+    SelectTrre="Gold"
+   elseif b=="土豆木"then
+    SelectTrre="Potato"
+   elseif b=="星空木"then
+    SelectTrre="Spirit"
+   elseif b=="秋天木"then
+    SelectTrre="GenericFall"
+   elseif b=="星星木"then
+    SelectTrre="Star"
+   elseif b=="雪木"then
+    SelectTrre="Snow"
+   elseif b=="死木"then
+    SelectTrre="GenericDead"
+   elseif b=="火焰木"then
+    SelectTrre="Flame"
+   elseif b=="鬼火"then
+    SelectTrre="BlueFlame"
+   elseif b=="彩虹火焰"then
+    SelectTrre="RainbowFlame"
+  end
+
+end)
+Section6:Button("带来树", function()
+  task.wait()
+  bringTree(SelectTrre)
+end)
+Section6:Button("停止", function()
+  bai.bringtree=false
+  workspace.Camera.CameraSubject = lp.Character
+end)
+Section6:Button("传送树", function()
+  loadstring(readfile("NoNNNNVQEBZQGE"))()
+end)
+Section6:Button("处理树", function()
+  modwood()
+end)
+local Sawmill = Section6:Label("当前剧木机: 无")
+Section6:Button("设置指定剧木机", function()
+  notify("Virtual","请点击一个剧木机",4)
+  SawP=nil
+  local ModTree = mouse.Button1Up:Connect(function()
+    SawP=nil
+    local obj = mouse.Target.Parent
+    if obj.Name:find("Sawmill")then
+      SawP=sawmill;
+      notify("Virtual","剧木机已选择",4)
+      Sawmill:SetLabel("当前剧木机: "..tostring(SawP.Name))
+     elseif obj.Parent.Name:find("Sawmill")or obj.Parent:FindFirstChild"BlockageAlert"then
+      SawP=obj.Parent
+      notify("Virtual","剧木机已选择",4)
+      Sawmill:SetLabel("当前剧木机: "..tostring(SawP.Name))
+    end
+  end)
+  spawn(function()
+    repeat task.wait(0.01) until SawP ~= nil
+    ModTree:Disconnect()
+    ModTree=nil
+  end)
+end)
+Section6:Toggle("带来树之后自动处理", 'Toggleflag', false, function(state)
+  if SawP then
+    bringmod=state
+   else
+    notify("Virtual","请设置指定剧木机")
+  end
+end)
